@@ -1,0 +1,25 @@
+#cloud-config
+hostname: CoreOSn1
+ssh_authorized_keys:
+  - ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDtKuyZCN9qOULyFRHwkgujVbC7aN4c9jF6Qh4n8WAFMvsgBDJ2FF9Y9KQn0qYxEoNHbhn46AMEs75pLySpY3vyumAkbXZBvRG7f1zlImrUXik4eUcjNamyHzqATRy/za0UI62kKbH68W62Xogm7Xub1wZxJdF8QzwD4GqK1M73WXHduCJobeq5N3jf2THYhCBbmumaUsqvbsBRpHqkAb5/fbfBiKZEDcJiAjC7ZoTct6EBiDYXGcPMYmyeYpXCUUPRj1rondjgx88o+ng/MGt73dxK2hH5meLFUOxAWA2e/GS4UEKMGG9mpoYR9v2AtMzgXHj2hUxqlTetZjJMfkO3 roger@toshiba
+ 
+coreos:
+  units:
+    - name: etcd2.service
+      command: start
+    - name: 00-eth0.network
+      runtime: true
+      content: |
+        [Match]
+        Name=enp0s3
+
+        [Network]
+        Address=192.3.1.187/24
+        Gateway=172.20.10.2
+        DNS=168.95.1.1
+  etcd2:
+    discovery: https://discovery.etcd.io/5f7807a816f1baa68828ba448a75777f
+    advertise-client-urls: http://192.3.1.187:2379
+    initial-advertise-peer-urls: http://192.3.1.187:2380
+    listen-client-urls: http://0.0.0.0:2379
+    listen-peer-urls: http://192.3.1.187:2380
