@@ -51,17 +51,17 @@ def usage():
 	sys.exit(1)
 
 
-def TestResult():
+def TestResult(a):
 	#rx_package_end=$(cat /sys/class/net/$dstDev/statistics/rx_bytes)
 	#rx_package_rsl=$(( $rx_package_end - $rx_package_org ))
-	strTime=os.system("cat /proc/net/pktgen/" + srcDev + "| grep Result | awk '{print $3}' | awk -F '(' '{ print $1/1000000 }'")
-	totTras=os.system("cat /sys/class/net/" + srcDev + "/statistics/tx_bytes | awk '{print $1/1024/1024}'")
+	strTime=os.system("cat /proc/net/pktgen/" + a + "| grep Result | awk '{print $3}' | awk -F '(' '{ print $1/1000000 }'")
+	totTras=os.system("cat /sys/class/net/" + a + "/statistics/tx_bytes | awk '{print $1/1024/1024}'")
 	#totRecv=$(cat /sys/class/net/$dstDev/statistics/rx_bytes | awk '{print $1/1024/1024}')
-	totCount=os.system("cat /proc/net/pktgen/" + srcDev + "| grep sofar | awk '{print $2}'")
-	perMB=os.system("cat /proc/net/pktgen/" + srcDev + "| grep Mb/sec | awk '{print $2}'")
-	tx_aborted_err=os.system("cat /sys/class/net/" + srcDev + "/statistics/tx_aborted_errors")
-	tx_carrier_err=os.system("cat /sys/class/net/" + srcDev + "/statistics/tx_carrier_errors")
-	tx_err=os.system("cat /sys/class/net/" + srcDev + "/statistics/tx_errors")
+	totCount=os.system("cat /proc/net/pktgen/" + a + "| grep sofar | awk '{print $2}'")
+	perMB=os.system("cat /proc/net/pktgen/" + a + "| grep Mb/sec | awk '{print $2}'")
+	tx_aborted_err=os.system("cat /sys/class/net/" + a + "/statistics/tx_aborted_errors")
+	tx_carrier_err=os.system("cat /sys/class/net/" + a + "/statistics/tx_carrier_errors")
+	tx_err=os.system("cat /sys/class/net/" + a + "/statistics/tx_errors")
 	#rx_crc_err=$(cat /sys/class/net/$dstDev/statistics/rx_crc_errors)
 	##rx_err=$(cat /sys/class/net/$dstDev/statistics/rx_errors)
 	#rx_frame_err=$(cat /sys/class/net/$dstDev/statistics/rx_frame_errors)
@@ -195,4 +195,4 @@ print "Running... ctrl^C to stop"
 pgset "start" 
 print "Done"
 
-TestResult(srcDev , dstDev) 
+TestResult(srcDev) 
