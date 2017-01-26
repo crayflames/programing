@@ -3,9 +3,11 @@ import os
 import subprocess
 class nwchk:
 	#def __init__(self, a):
+		#pass
 	#	self.devChk(a)
 	#	self.devLink(a)
 	def devChk(self , a):
+		print (a)
 		os.system("cat /sys/class/net/" + a + "/statistics/tx_bytes")
 
 	def devLink(self, a ):
@@ -19,4 +21,3 @@ if __name__ == '__main__':
 	dev = nwchk()
 	#dev.devChk('enp0s25')
 	dev.devChk('enp0s25')
-	#dev.nwchk.dev
