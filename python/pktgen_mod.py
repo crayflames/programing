@@ -21,9 +21,9 @@ class nwchk:
 			print ( a + " is not exist")
 			sys.exit(2)
 		s=subprocess.getoutput("cat /sys/class/net/" + str(a) + "/operstate")
-		if s == 'up':
-			print ( a + ' is link up' )
-		else:
+		if not s == 'up':
+			#pass
+		#else:
 			print ( a + ' is link unknow' )
 			sys.exit(2)
 	def devList():
@@ -85,10 +85,7 @@ def TestResult(a):
 def pgset(a):
 	global PGDEV
 	cmd='echo "' + a + '"'+' > ' + PGDEV
-	#echo "rem_device_call" > /proc/net/pktgen/kpktgend_0
-	print(cmd)
 	os.system(cmd)
-	
 	result='cat' + PGDEV + '| fgrep "Result: OK:"'
 	if not result.strip():
 		os.system("cat " + PGDEV + "| fgrep Result")
@@ -140,12 +137,11 @@ def main(argv):
 		cmd='modprobe pktgen'
 		cmdRt=os.system(cmd)
 		if cmdRt == 0 :
-			print ('pktgen loaded')
+			pass
 		else:
 			print ('pktgen not loaded')
 
 	print ("Adding devices to run.")
-	#PGDEV = '/proc/net/pktgen/kpktgend_0'
 	pgset ("rem_device_all")
 	pgset ('add_device ' + dev['srcDev'] )
 	pgset ("max_before_softirq 1000000")
@@ -177,4 +173,3 @@ if __name__ == "__main__":
 	if len(sys.argv) < 2:
 		usage()
 	main(sys.argv[1:])
-
