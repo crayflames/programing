@@ -19,8 +19,6 @@ class nwchk:
 			sys.exit(2)
 		s=subprocess.getoutput("cat /sys/class/net/" + str(a) + "/operstate")
 		if not s == 'up':
-			#pass
-		#else:
 			print ( a + ' is link unknow' )
 			sys.exit(2)
 	def devList():
