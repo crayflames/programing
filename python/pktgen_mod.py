@@ -1,11 +1,11 @@
 #! /usr/bin/env python3
 ## pktgen.conf -- configuration for send on devices
-## Modified 01/26
+## Modified 01/26 ver1
 import os
 import sys
 import getopt
 import subprocess
-import re
+
 dev={}
 dev['srcDev']=''
 dev['dstDev']=''
@@ -13,9 +13,6 @@ dev['testCNT']='15000'
 dev['testMTU']='1500'
 PGDEV = '/proc/net/pktgen/kpktgend_0'
 class nwchk:
-	#def __init__(self, a):
-	#	self.devChk(a)
-	#	self.devLink(a)
 	def devChk(self , a):
 		if not os.path.exists("/sys/class/net/" + str(a)):
 			print ( a + " is not exist")
@@ -30,8 +27,6 @@ class nwchk:
 		os.system("ifconfig -a | grep ether")
 
 def usage():
-#print "Function: port to port || mac to mac. "
-#print "          Counter by User setting. "
 	print ("\t Please follow format to stress Ethernet device \n \
 \t such as : \n \
 \t Host port to port \n \
@@ -79,9 +74,6 @@ def TestResult(a):
 	#print "rx_missed_err             : $rx_missed_err"
 	#print "rx_over_err               : $rx_over_err"
 
-
-#Paramter check if null then exit
-
 def pgset(a):
 	global PGDEV
 	cmd='echo "' + a + '"'+' > ' + PGDEV
@@ -94,10 +86,6 @@ def pg(a):
 	global PGDEV
 	os.system("print inject > " + PGDEV)
 	print (PGDEV)
-
-
-##Check target device shoule be  exist, Need update more device to 2way stress
-	
 
 def argchk(a):
 	if not a.strip():
