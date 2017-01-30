@@ -19,8 +19,7 @@ class nwchk:
 		if not os.path.exists("/sys/class/net/" + str(a)):
 			print ( a + " is not exist")
 			sys.exit(2)
-		else:
-			print(a + " is exist.")
+
 
 	def devLink(self, a):
 		#print 裝置狀態
