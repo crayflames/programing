@@ -116,7 +116,7 @@ def main(argv):
 			dev['testCNT'] = arg
 		elif opt in ("-m", "--mtu"):
 			dev['testMTU'] = arg
-#加入mac 判斷
+
 	for _ in dev:
 		if not dev.get(_):
 			print(_ + "is not set")
