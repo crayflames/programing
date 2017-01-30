@@ -1,4 +1,5 @@
 #! /usr/bin/env python3
+# -*- coding: utf8 -*-
 ## pktgen.conf -- configuration for send on devices
 ## Modified 01/26 ver1
 import os
@@ -6,23 +7,36 @@ import sys
 import getopt
 import subprocess
 
-dev={}
-dev['srcDev']=''
-dev['dstDev']=''
-dev['testCNT']='15000'
-dev['testMTU']='1500'
+dev={'srcDev':'','dstDev':'','testCNT':'15000','testMTU':'1500'}
 PGDEV = '/proc/net/pktgen/kpktgend_0'
 class nwchk:
+	def __init__(self,a):
+		print (a)
+		self.devChk(a)
+		self.devLink(a)
 	def devChk(self , a):
+		#確認裝置是否存在
 		if not os.path.exists("/sys/class/net/" + str(a)):
 			print ( a + " is not exist")
 			sys.exit(2)
+		else:
+			print(a + " is exist.")
+
+	def devLink(self, a):
+		#print 裝置狀態
 		s=subprocess.getoutput("cat /sys/class/net/" + str(a) + "/operstate")
+		#print 出連線狀態
 		if not s == 'up':
 			print ( a + ' is link unknow' )
 			sys.exit(2)
+	def devMac(self, a):
+		#將輸入的dev 置換成mac 傳回 需搭配 line 133 : 	dev['dstMac']=dev['devmac'] 做切換的動作
+		self.devChk(a)		
+		dev['devmac']=subprocess.getoutput('cat /sys/class/net/' + a + '/address')
+		
+
 	def devList():
-		os.system("ifconfig -a | grep ether")
+		os.system("ip addr | grep ether")
 
 def usage():
 	print ("\t Please follow format to stress Ethernet device \n \
@@ -33,7 +47,6 @@ def usage():
 \t MTU 1500 : 1 count eq 4.4kb \n \
 \t MTU 9014 : 1 count eq 8.8kb")
 	sys.exit(1)
-
 
 def TestResult(a):
 	#rx_package_end=$(cat /sys/class/net/$dstDev/statistics/rx_bytes)
@@ -85,11 +98,6 @@ def pg(a):
 	os.system("print inject > " + PGDEV)
 	print (PGDEV)
 
-def argchk(a):
-	if not a.strip():
-		print( a + ' device is not set' )
-		sys.exit(2)
-
 def main(argv):
 	try:
 		opts, args = getopt.getopt(argv,"hs:d:c:m:")
@@ -108,13 +116,16 @@ def main(argv):
 			dev['testCNT'] = arg
 		elif opt in ("-m", "--mtu"):
 			dev['testMTU'] = arg
+#加入mac 判斷
 	for _ in dev:
-		argchk(_)
+		if not dev.get(_):
+			print(_ + "is not set")
+			sys.exit(2)
+	
+	s=nwchk(dev['srcDev'])
+	s.devMac(dev['dstDev'])
+	dev['dstMac']=dev['devmac']
 
-	s=nwchk()
-	s.devChk(dev['srcDev'])
-	s.devChk(dev['dstDev'])
-	dstMac=subprocess.getoutput('cat /sys/class/net/' + dev['dstDev'] + '/address')
 	cmdRt=os.system('lsmod | grep pktgen')
 	print (cmdRt)
 	if cmdRt == 0 :
@@ -142,8 +153,8 @@ def main(argv):
 	#pgset "max_pkt_size 1500"
 
 	print ("Configuring devices " + dev['srcDev'])
-	pgset ('dst_mac ' + dstMac )
-	print ("Src port " + dev['srcDev'] + "--> Dst port: dstDev Mac: " + dstMac)
+	pgset ('dst_mac ' + dev['dstMac'] )
+	print ("Src port " + dev['srcDev'] + "--> Dst port: dstDev Mac: " + dev['dstMac'])
 	pgset ("count " + dev['testCNT'])
 	pgset ("delay 0")
 
