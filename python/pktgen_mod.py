@@ -30,12 +30,14 @@ class nwchk:
 			sys.exit(2)
 
 	def devMac(self, a):
+		#2/8比對輸入的格式需符合macaddress的格式 [英文數字][英文數字]:[英文數字][英文數字]		
 		m = re.match(r'\w\w:\w\w:\w\w:\w\w:\w\w:\w\w',a)
 		if m:
 			dev['dstMac']=a
 		else:
 			self.devChk(a)
 			global dstresult
+			#2/8判斷目標port 是否為本機的，是的話 dstresult 為1			
 			dstresult=1
 			dev['dstMac']=open('/sys/class/net/' + a + '/address').readline().strip()
 
@@ -67,6 +69,7 @@ def TestResult(a,b):
 	subprocess.call(['ethtool', '-S', dev['srcDev']])
 	global dstresult
 	if dstresult == 1:
+		#2/8判斷目標port 是否為本機的，是的話 dstresult 為1，在最後輸出目標port的errorcheck
 		print ('=== Error Check ' + dev['dstDev'] + '===')
 		subprocess.call(['ethtool', '-S', dev['dstDev']])
 
