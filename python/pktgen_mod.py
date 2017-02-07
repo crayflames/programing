@@ -1,17 +1,17 @@
 #! /usr/bin/env python3
 # -*- coding: utf8 -*-
 ## pktgen.conf -- configuration for send on devices
-## Modified 01/26 ver1
+## Modified 02/7 ver1
 import os
 import sys
 import getopt
 import subprocess
+import re
 
 dev={'srcDev':'','dstDev':'','testCNT':'15000','testMTU':'1500'}
 PGDEV = '/proc/net/pktgen/kpktgend_0'
 class nwchk:
 	def __init__(self,a):
-		print (a)
 		self.devChk(a)
 		self.devLink(a)
 	def devChk(self , a):
@@ -20,44 +20,50 @@ class nwchk:
 			print ( a + " is not exist")
 			sys.exit(2)
 
-
 	def devLink(self, a):
 		#print 裝置狀態
-		s=subprocess.getoutput("cat /sys/class/net/" + str(a) + "/operstate")
+		s=subprocess.getoutput('cat /sys/class/net/' + str(a) + "/operstate")
 		#print 出連線狀態
 		if not s == 'up':
 			print ( a + ' is link unknow' )
 			sys.exit(2)
-	def devMac(self, a):
-		#將輸入的dev 置換成mac 傳回 需搭配 line 133 : 	dev['dstMac']=dev['devmac'] 做切換的動作
-		self.devChk(a)		
-		dev['devmac']=subprocess.getoutput('cat /sys/class/net/' + a + '/address')
-		
 
-	def devList():
-		os.system("ip addr | grep ether")
+	def devMac(self, a):
+		m = re.match(r'\w\w:\w\w:\w\w:\w\w:\w\w:\w\w',a)
+		if m:
+			dev['dstMac']=a
+		else:
+			self.devChk(a)		
+			dev['dstMac']=subprocess.getoutput('cat /sys/class/net/' + a + '/address')
 
 def usage():
 	print ("\t Please follow format to stress Ethernet device \n \
 \t such as : \n \
 \t Host port to port \n \
 \t pktgen_mod.py -s eth0 -d eth1 -c 15000 -m 1500\n \
+\t Host port to MAC \n \
+\t pktgen_mod.py -s eth0 -d 00:00:00:00:00:00 -c 15000 -m 1500\n \
 \t [Count] setting as 0 is inifinit loop \n \
 \t MTU 1500 : 1 count eq 4.4kb \n \
 \t MTU 9014 : 1 count eq 8.8kb")
 	sys.exit(1)
 
 def TestResult(a):
-	#rx_package_end=$(cat /sys/class/net/$dstDev/statistics/rx_bytes)
-	#rx_package_rsl=$(( $rx_package_end - $rx_package_org ))
 	strTime=subprocess.getoutput("cat /proc/net/pktgen/" + a + "| grep Result | awk '{print $3}' | awk -F '(' '{ print $1/1000000 }'")
 	totTras=subprocess.getoutput("cat /sys/class/net/" + a + "/statistics/tx_bytes | awk '{print $1/1024/1024}'")
-	#totRecv=$(cat /sys/class/net/$dstDev/statistics/rx_bytes | awk '{print $1/1024/1024}')
 	totCount=subprocess.getoutput("cat /proc/net/pktgen/" + a + "| grep sofar | awk '{print $2}'")
 	perMB=subprocess.getoutput("cat /proc/net/pktgen/" + a + "| grep Mb/sec | awk '{print $2}'")
+
+	#tx_aborted_err=open("/sys/class/net/" + a + "/statistics/tx_aborted_errors").readline()
+	#tx_carrier_err=open("/sys/class/net/" + a + "/statistics/tx_carrier_errors").readline()
+	#tx_err=open("/sys/class/net/" + a + "/statistics/tx_errors").readline()
+
 	tx_aborted_err=subprocess.getoutput("cat /sys/class/net/" + a + "/statistics/tx_aborted_errors")
 	tx_carrier_err=subprocess.getoutput("cat /sys/class/net/" + a + "/statistics/tx_carrier_errors")
 	tx_err=subprocess.getoutput("cat /sys/class/net/" + a + "/statistics/tx_errors")
+
+	#rx_package_end=$(cat /sys/class/net/$dstDev/statistics/rx_bytes)
+	#rx_package_rsl=$(( $rx_package_end - $rx_package_org ))
 	#rx_crc_err=$(cat /sys/class/net/$dstDev/statistics/rx_crc_errors)
 	##rx_err=$(cat /sys/class/net/$dstDev/statistics/rx_errors)
 	#rx_frame_err=$(cat /sys/class/net/$dstDev/statistics/rx_frame_errors)
@@ -72,11 +78,11 @@ def TestResult(a):
 	print ("Parameter Count	   	  : " + str(dev['testCNT']) )
 	print ("Total transfer count      : " + str(totCount) )
 	print ("Total transfer MB 	  : " + str(totTras) + "MB")
-	#print "Total receive count       : $rx_package_rsl"
-	#print "Total receive MB  : $totRecv"
 	print ("tx_aborted_err            : " + str(tx_aborted_err) )
 	print ("tx_carrier_err            : " + str(tx_carrier_err) )
 	print ("tx_err                    : " + str(tx_err) )
+	#print "Total receive count       : $rx_package_rsl"
+	#print "Total receive MB  : $totRecv"
 	#print "rx_crc_err                : $rx_crc_err"
 	#print "rx_err                    : $rx_err"
 	#print "rx_frame_err              : $rx_frame_err"
@@ -123,7 +129,7 @@ def main(argv):
 	
 	s=nwchk(dev['srcDev'])
 	s.devMac(dev['dstDev'])
-	dev['dstMac']=dev['devmac']
+
 
 	cmdRt=os.system('lsmod | grep pktgen')
 	print (cmdRt)
@@ -138,6 +144,7 @@ def main(argv):
 			print ('pktgen not loaded')
 
 	print ("Adding devices to run.")
+
 	pgset ("rem_device_all")
 	pgset ('add_device ' + dev['srcDev'] )
 	pgset ("max_before_softirq 1000000")
@@ -163,9 +170,8 @@ def main(argv):
 	pgset ("start")
 	print ("Done")
 
-	TestResult(dev['srcDev']) 
-
 if __name__ == "__main__":
 	if len(sys.argv) < 2:
 		usage()
 	main(sys.argv[1:])
+	TestResult(dev['srcDev'])
