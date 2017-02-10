@@ -12,13 +12,15 @@ import multiprocessing
 dev={'srcDev':'','dstDev':'','testCNT':'15000','testMTU':'1500'}
 
 dstresult=0
+bilateral=0
 coreNum=multiprocessing.cpu_count()
 kpklist=[]
 for i in range(coreNum) : 
 	if os.path.exists('/proc/net/pktgen/kpktgend_'+str(i)) :
 		kpklist.append('/proc/net/pktgen/kpktgend_'+str(i))
+a=0
+PGDEV = kpklist[a]
 
-PGDEV = '/proc/net/pktgen/kpktgend_0'
 
 class nwchk:
 	def __init__(self,a):
@@ -95,9 +97,22 @@ def pg(a):
 	os.system("print inject > " + PGDEV)
 	print (PGDEV)
 
+def adddev():
+	pgset ('add_device ' + dev['srcDev'] )
+	pgset ("max_before_softirq 1000000")
+
+def addconfig():
+	pgset ('clone_skb 1000000')
+	pgset ('pkt_size ' + dev['testMTU'])
+	print ("Configuring devices " + dev['srcDev'])
+	pgset ('dst_mac ' + dev['dstMac'] )
+	print ("Src port " + dev['srcDev'] + "--> Dst port: dstDev Mac: " + dev['dstMac'])
+	pgset ("count " + dev['testCNT'])
+	pgset ("delay 0")
+
 def main(argv):
 	try:
-		opts, args = getopt.getopt(argv,"hs:d:c:m:")
+		opts, args = getopt.getopt(argv,"hs:d:c:m:D")
 	except getopt.GetoptError:
 		usage()
 		sys.exit(2)
@@ -113,6 +128,9 @@ def main(argv):
 			dev['testCNT'] = arg
 		elif opt in ("-m", "--mtu"):
 			dev['testMTU'] = arg
+		elif opt in ("-b", "--bilateral"):
+			global
+			bilateral=1
 
 	for _ in dev:
 		if not dev.get(_):
@@ -135,25 +153,13 @@ def main(argv):
 			print ('pktgen not loaded')
 
 	print ("Adding devices to run.")
-
 	pgset ("rem_device_all")
-	pgset ('add_device ' + dev['srcDev'] )
-	pgset ("max_before_softirq 1000000")
+	adddev()
 
 	## Configure the individual devices
 	global PGDEV
 	PGDEV="/proc/net/pktgen/" + dev['srcDev']
-	pgset ('clone_skb 1000000')
-	pgset ('pkt_size ' + dev['testMTU'])
-
-	#pgset "min_pkt_size 60"
-	#pgset "max_pkt_size 1500"
-
-	print ("Configuring devices " + dev['srcDev'])
-	pgset ('dst_mac ' + dev['dstMac'] )
-	print ("Src port " + dev['srcDev'] + "--> Dst port: dstDev Mac: " + dev['dstMac'])
-	pgset ("count " + dev['testCNT'])
-	pgset ("delay 0")
+	addcconfig()
 
 	PGDEV='/proc/net/pktgen/pgctrl'
 

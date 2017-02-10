@@ -1,8 +1,6 @@
 #! /usr/bin/env python3
 # -*- coding: utf8 -*-
-import sys
 import os
-import stat
 #列出資料夾底下的檔案，清單形式
 os.listdir()
 #修改檔案目錄
