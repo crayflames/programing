@@ -23,3 +23,12 @@ for _ in dev:
 print ('dddd ' + dev['src'])
 dev['src']='enp0s25'
 dstMac=os.system('cat /sys/class/net/' + dev['src'] + '/address')
+
+distlist={'a':'1','b':'2','c':'3'}
+
+for _ in distlist:
+	if _ == 'a':
+		print ('%s' % distlist[_])
+	else:
+		print('nothing')
+print('%s' % distlist.get('d','Not exist'))

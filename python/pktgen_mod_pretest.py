@@ -139,23 +139,10 @@ def main(argv):
 	
 	s=nwchk(dev['srcDev'])
 	s.devMac(dev['dstDev'])
-
-	cmdRt=os.system('lsmod | grep pktgen')
-	print (cmdRt)
-	if cmdRt == 0 :
-		pass
-	else:
-		cmd='modprobe pktgen'
-		cmdRt=os.system(cmd)
-		if cmdRt == 0 :
-			pass
-		else:
-			print ('pktgen not loaded')
-
 	print ("Adding devices to run.")
 	pgset ("rem_device_all")
 	adddev()
-
+	
 	## Configure the individual devices
 	global PGDEV
 	PGDEV="/proc/net/pktgen/" + dev['srcDev']
@@ -170,5 +157,16 @@ def main(argv):
 if __name__ == "__main__":
 	if len(sys.argv) < 2:
 		usage()
+	cmdRt=os.system('lsmod | grep pktgen')
+	print (cmdRt)
+	if cmdRt == 0 :
+		pass
+	else:
+		cmd='modprobe pktgen'
+		cmdRt=os.system(cmd)
+		if cmdRt == 0 :
+			pass
+		else:
+			print ('pktgen not loaded')
 	main(sys.argv[1:])
 	TestResult(dev['srcDev'],dev['dstDev'])
