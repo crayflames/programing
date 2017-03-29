@@ -4,6 +4,7 @@ import pyautogui
 import time
 import tkinter as tk
 import subprocess
+import sys
 IP='192.8.1.180'
 IPMITOOL='ipmitool -H '
 ipmiPara=' -U admin -P admin -I lanplus'
@@ -11,8 +12,9 @@ log=' | tee expander_'
 pyautogui.FAILSAFE = True
 array=['fwinfo','counters','phyinfo','showpost']
 cmdRt=subprocess.call('ping ' + IP + ' -c 3', shell=True)
-testTime=1
-while testTime == 150:
+startTime=time.time()
+endTime=time.time()
+while (endTime-startTime) < 1000:
 	if cmdRt == 0:
 		pyautogui.hotkey('ctrl','alt','t')
 		time.sleep(2)
@@ -34,11 +36,14 @@ while testTime == 150:
 			pyautogui.press(['~','.'])
 			time.sleep(2)
 			x+=1
-		win=tk.Tk()
-		win.title("tk title")
-		label=tk.Label(win,text="Done")
-		label.pack()
-		win.mainloop()
-		testTime+=1
+			endTime=time.time()
 	else:
 		print('Network unavailable')
+		#sys.exit(1)
+		endTime=time.time()
+
+win=tk.Tk()
+win.title("tk title")
+label=tk.Label(win,text="Done")
+label.pack()
+win.mainloop()
