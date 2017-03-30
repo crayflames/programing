@@ -2,6 +2,7 @@
 # -*- coding: utf8 -*-
 from urllib.request import urlopen
 from bs4 import BeautifulSoup
-html = urlopen("http://www.pythonscraping.com/pages/page1.html")
+html = urlopen("http://www.pythonscraping.com/pages/page3.html")
 bs0bj = BeautifulSoup(html,"lxml")
-print(bs0bj.html.body.h1.text)
+for child in bs0bj.find("table",{"id":"giftList"}).tr.next_siblings:
+	print(child)

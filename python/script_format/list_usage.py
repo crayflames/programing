@@ -10,3 +10,5 @@ for i in range(coreNum) :
 print(kpklist)
 PGDEV = kpklist[2]
 print(PGDEV)
+for i in kpklist:
+	print(i)
