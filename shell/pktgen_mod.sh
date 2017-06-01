@@ -24,14 +24,22 @@ usage(){
 	echo $DevSrc > DEV.file
 	DevList=$(cat DEV.file | awk '{print $1 " " $2}')
 	echo "  On this OS you can type format as below"
+<<<<<<< HEAD
 	echo "		Port to Port    ./pktgen.sh -P $DevList 15000"
 	echo "		Port to MAC     ./pktgen.sh -M eth0 00:00:00:00:00:00 15000"
+=======
+	echo "          Port to Port    ./pktgen.sh -P $DevList"
+>>>>>>> a483964f3829e4fd8826e7c374b670b4cfaa32ac
 	rm -f DEV.file
 }
 
 lsmod | grep pktgen
 if [ $? -eq 1 ]; then
+<<<<<<< HEAD
 	modprobe pktgen > /dev/null 2>&1
+=======
+	modprobe pktgen
+>>>>>>> a483964f3829e4fd8826e7c374b670b4cfaa32ac
 fi
 TestResult(){
 	#rx_package_end=$(cat /sys/class/net/$dstDev/statistics/rx_bytes)
@@ -89,7 +97,11 @@ LinkExist(){
 
 setCnt(){
 	[ -z $1 ] && usage
+<<<<<<< HEAD
 	[ $1 -ge 0 > /dev/null 2>&1 ] || (echo "Please set up test counter. 0 as loop " )
+=======
+	[ $1 -ge 0 2>/dev/null ] || (echo "Please set up test counter. 0 as loop " )
+>>>>>>> a483964f3829e4fd8826e7c374b670b4cfaa32ac
 	tstCnt=$1
 	break
 }
