@@ -1,4 +1,4 @@
-#! /bin/sh
+#!/bin/sh
 ## pktgen.conf -- configuration for send on devices 
 tx_aborted_err=0
 tx_carrier_err=0
@@ -27,52 +27,53 @@ echo "	On this OS you can type format as below"
 echo "		Port to Port	./pktgen.sh -P $DevList"
 rm -f DEV.file
 }
-lsmod | grep pktgen 
-[ $? == 1 ] &&  modprobe pktgen 
+lsmod | grep pktgen
+if [ $? -eq 1 ]; then
+    modprobe pktgen
+fi
 
 
 TestResult(){
-strTime=$(cat /proc/net/pktgen/$srcDev | grep Result | awk '{print $3}' | awk -F '(' '{ print $1/1000000 }')
-totTras=$(cat /sys/class/net/$srcDev/statistics/tx_bytes | awk '{print $1/1024/1024}')
-
-totCount=$(cat /proc/net/pktgen/$srcDev | grep sofar | awk '{print $2}')
-perMB=$(cat /proc/net/pktgen/$srcDev | grep Mb/sec | awk '{print $2}')
-tx_aborted_err=$(cat /sys/class/net/$srcDev/statistics/tx_aborted_errors)
-tx_carrier_err=$(cat /sys/class/net/$srcDev/statistics/tx_carrier_errors)
-tx_err=$(cat /sys/class/net/$srcDev/statistics/tx_errors)
+    strTime=$(cat /proc/net/pktgen/$srcDev | grep Result | awk '{print $3}' | awk -F '(' '{ print $1/1000000 }')
+    totTras=$(cat /sys/class/net/$srcDev/statistics/tx_bytes | awk '{print $1/1024/1024}')
+    totCount=$(cat /proc/net/pktgen/$srcDev | grep sofar | awk '{print $2}')
+    perMB=$(cat /proc/net/pktgen/$srcDev | grep Mb/sec | awk '{print $2}')
+    tx_aborted_err=$(cat /sys/class/net/$srcDev/statistics/tx_aborted_errors)
+    tx_carrier_err=$(cat /sys/class/net/$srcDev/statistics/tx_carrier_errors)
+    tx_err=$(cat /sys/class/net/$srcDev/statistics/tx_errors)
 if [ $rx = 0 ]; then
-rx_crc_err=$(cat /sys/class/net/$dstDev/statistics/rx_crc_errors)
-totRecv=$(cat /sys/class/net/$dstDev/statistics/rx_bytes | awk '{print $1/1024/1024}')
-rx_package_end=$(cat /sys/class/net/$dstDev/statistics/rx_bytes)
-rx_package_rsl=$(( $rx_package_end - $rx_package_org )) 
-rx_err=$(cat /sys/class/net/$dstDev/statistics/rx_errors)
-rx_frame_err=$(cat /sys/class/net/$dstDev/statistics/rx_frame_errors)
-rx_length_err=$(cat /sys/class/net/$dstDev/statistics/rx_length_errors)
-rx_missed_err=$(cat /sys/class/net/$dstDev/statistics/rx_missed_errors)
-rx_over_err=$(cat /sys/class/net/$dstDev/statistics/rx_over_errors)
+    rx_crc_err=$(cat /sys/class/net/$dstDev/statistics/rx_crc_errors)
+    totRecv=$(cat /sys/class/net/$dstDev/statistics/rx_bytes | awk '{print $1/1024/1024}')
+    rx_package_end=$(cat /sys/class/net/$dstDev/statistics/rx_bytes)
+    rx_package_rsl=$(( $rx_package_end - $rx_package_org )) 
+    rx_err=$(cat /sys/class/net/$dstDev/statistics/rx_errors)
+    rx_frame_err=$(cat /sys/class/net/$dstDev/statistics/rx_frame_errors)
+    rx_length_err=$(cat /sys/class/net/$dstDev/statistics/rx_length_errors)
+    rx_missed_err=$(cat /sys/class/net/$dstDev/statistics/rx_missed_errors)
+    rx_over_err=$(cat /sys/class/net/$dstDev/statistics/rx_over_errors)
 fi
 
-echo "Test Result :"
-echo "Total running time 	: $strTime sec"
-echo "Performance        	: $perMB"
-echo "packet size	 	: $pktSIZE"
-echo "Parameter Count  	: $testCNT"
-echo "Total transfer count	: $totCount"
-echo "Total transfer MB	: $totTras"
-echo "Total receive count	: $rx_package_rsl"
-echo "Total receive MB	: $totRecv"
-echo "tx_aborted_err		: $tx_aborted_err"
-echo "tx_carrier_err		: $tx_carrier_err"
-echo "tx_err			: $tx_err"
-echo "rx_crc_err		: $rx_crc_err"
-echo "rx_err			: $rx_err"
-echo "rx_frame_err		: $rx_frame_err"
-echo "rx_length_err		: $rx_length_err"
-echo "rx_missed_err		: $rx_missed_err"
-echo "rx_over_err		: $rx_over_err"
+    echo "Test Result :"
+    echo "Total running time 	: $strTime sec"
+    echo "Performance        	: $perMB"
+    echo "packet size	 	: $pktSIZE"
+    echo "Parameter Count  	: $testCNT"
+    echo "Total transfer count	: $totCount"
+    echo "Total transfer MB	: $totTras"
+    echo "Total receive count	: $rx_package_rsl"
+    echo "Total receive MB	: $totRecv"
+    echo "tx_aborted_err		: $tx_aborted_err"
+    echo "tx_carrier_err		: $tx_carrier_err"
+    echo "tx_err			: $tx_err"
+    echo "rx_crc_err		: $rx_crc_err"
+    echo "rx_err			: $rx_err"
+    echo "rx_frame_err		: $rx_frame_err"
+    echo "rx_length_err		: $rx_length_err"
+    echo "rx_missed_err		: $rx_missed_err"
+    echo "rx_over_err		: $rx_over_err"
 }
 devList() {
-ifconfig -a | grep HWaddr
+    ifconfig -a | grep HWaddr
 }
 
 LinkStat(){
@@ -126,15 +127,11 @@ fi
 setPkt(){
 [ $1 -ge 0 2>/dev/null ] && pktSize=$1 || echo "Test counter is null. default is 1514."
 while [ "$pktSize" == 0 ];do
-echo "Package should not be 0"
-read -p "Please enter package_size: " pktSize
+    echo "Package should not be 0"
+    read -p "Please enter package_size: " pktSize
 done
 
 }
-
-
-#Paramter check if null then exit
-#[ $# -le 0 ] && usage && exit 1
 
 function pgset(){
     local result

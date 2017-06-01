@@ -2,6 +2,10 @@
 import sys
 import os
 import subprocess
+def test(a,b):
+    for i in a,b:
+             print(i)
+
 def run(server="client",*args):
 	if server=="server":
 		print (server)
@@ -32,3 +36,4 @@ srcDev='enp0s25'
 TestResult(srcDev)
 run("server")
 devLink('enp0s25')
+test(1,2)
