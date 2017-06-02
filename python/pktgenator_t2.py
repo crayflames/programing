@@ -15,15 +15,14 @@ err={'errchk':'0','dstresult':'0'}
 coreNum=multiprocessing.cpu_count()
 setSrcCount=0
 setDstCount=0
-
+devSRC={}
+devDST={}
 def SRClist(a):
-	devSRC={}
 	global setSrcCount
 	setSrcCount+=1
 	devSRC['src'+str(setSrcCount)]=a
 
 def DSTlist(a):
-	devDST={}
 	global setDstCount
 	setDstCount+=1
 	devDST['dst'+str(setDstCount)]=a
@@ -59,9 +58,10 @@ class nwchk:
 			dev['dstMac']=open('/sys/class/net/' + a + '/address').readline().strip()
 
 def TestResult():
-	print(res)
 	for i in res:
 		if os.path.exists('/proc/net/pktgen/'+ i):
+			if res.count(i) > 1:
+				res.remove(i)
 			print ("=== " + i + " ===")
 			strTime=subprocess.getoutput("cat /proc/net/pktgen/" + i + "| grep Result | awk '{print $3}' | awk -F '(' '{ print $1/1000000 }'")
 			totTras=subprocess.getoutput("cat /sys/class/net/" + i + "/statistics/tx_bytes | awk '{print $1/1024/1024}'")
@@ -93,15 +93,15 @@ def pg(a):
 	print (PGDEV)
 
 def adddev():
-	pgset ('add_device ' + dev['srcDev'] )
+	pgset ('add_device ' + devSRC['src'+str(setSrcCount)] )
 	pgset ("max_before_softirq 1000000")
 
 def addconfig():
 	pgset ('clone_skb 1000000')
 	pgset ('pkt_size ' + dev['testMTU'])
-	print ("Configuring devices " + dev['srcDev'])
+	print ("Configuring devices " + devSRC['src'+str(setSrcCount)])
 	pgset ('dst_mac ' + dev['dstMac'] )
-	print ("Src port " + dev['srcDev'] + "--> Dst port: dstDev Mac: " + dev['dstMac'])
+	print ("Src port " + devSRC['src'+str(setSrcCount)] + "--> Dst port: dstDev Mac: " + dev['dstMac'])
 	pgset ("count " + dev['testCNT'])
 	pgset ("delay 0")
 
@@ -149,36 +149,37 @@ def main(argv):
 		if not dev.get(_):
 			print(_ + "is not set")
 			sys.exit(2)
+	global setSrcCount
+	global setDstCount
 	pgset ("rem_device_all")
 	print ("Adding devices to run.")
-
-	s=nwchk(dev['srcDev'])
-	s.devMac(dev['dstDev'])
+	s=nwchk(devSRC['src'+str(setSrcCount)])
+	s.devMac(devDST['dst'+str(setDstCount)])
 	adddev()
 	
 	## Configure the individual devices
 	global PGDEV
-	PGDEV="/proc/net/pktgen/" + dev['srcDev']
+	PGDEV="/proc/net/pktgen/" + devSRC['src'+str(setSrcCount)]
 	addconfig()
-	res.append(dev['srcDev'])
+	res.append(devSRC['src'+str(setSrcCount)])
 	#change device for test two-way
 	#5/28
 	if dev['bilateral'] == 1:
-		srcBil=dev['srcDev']
-		dstBil=dev['dstDev']
-		dev['dstDev']=srcBil
-		dev['srcDev']=dstBil
+		srcBil=devSRC['src'+str(setSrcCount)]
+		dstBil=devDST['dst'+str(setDstCount)]
+		setDstCount+=1
+		setSrcCount+=1
+		devDST['dst'+str(setDstCount)]=srcBil
+		devSRC['src'+str(setSrcCount)]=dstBil
 		global a
 		a+=1
-		kpklist[a]
-		print(kpklist[a])
 		PGDEV = kpklist[a]
-		s=nwchk(dev['srcDev'])
-		s.devMac(dev['dstDev'])
+		s=nwchk(devSRC['src'+str(setSrcCount)])
+		s.devMac(devDST['dst'+str(setDstCount)])
 		adddev()
-		PGDEV="/proc/net/pktgen/" + dev['srcDev']
+		PGDEV="/proc/net/pktgen/" + devSRC['src'+str(setSrcCount)]
 		addconfig()
-		res.append(dev['srcDev'])
+		res.append(devSRC['src'+str(setSrcCount)])
 
 	PGDEV='/proc/net/pktgen/pgctrl'
 
