@@ -4,3 +4,4 @@ b=['1_ac','$5','1_bd','$6']
 print (a , '\n' , b , '\n' ,b[-1])
 c=[a,b]
 print (c)
+a.append('sd')
