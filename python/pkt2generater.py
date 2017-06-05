@@ -107,7 +107,7 @@ def addconfig():
 
 def usage():
 	print ("usage: \n \
-	\t Network packages generater \n \
+	\t Network packages generater for python2 \n \
 	\t How to use : \n \
 	\t Host port to port \n \
 	\t ./pkt2generater.py -s eth0 -d eth1 -c [count]] -m [MTU] -b\n \

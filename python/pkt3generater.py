@@ -81,14 +81,14 @@ def TestResult():
 def pgset(a):
 	global PGDEV
 	cmd='echo "' + a + '"'+' > ' + PGDEV
-	os.system(cmd)
+	subprocess.call(cmd,shell='True')
 	result='cat' + PGDEV + '| fgrep "Result: OK:"'
 	if not result.strip():
-		os.system("cat " + PGDEV + "| fgrep Result")
+		subprocess.call("cat " + PGDEV + "| fgrep Result",shell="True")
 
 def pg(a):
 	global PGDEV
-	os.system("print inject > " + PGDEV)
+	subprocess.call("print inject > " + PGDEV,shell='True')
 	print (PGDEV)
 
 def adddev():
@@ -105,7 +105,9 @@ def addconfig():
 	pgset ("delay 0")
 
 def usage():
-	print ("\t Please follow format to stress Ethernet device \n \
+	print ("Usage: \n \
+	\t Network package generater for Python3 \n \
+	\t How to use : \n \
 	\t such as : \n \
 	\t Host port to port \n \
 	\t ./pkt3generater.py -s eth0 -d eth1 -c [count]] -m [MTU] -b\n \
