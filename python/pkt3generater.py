@@ -2,7 +2,6 @@
 # -*- coding: utf8 -*-
 ## pktgen.conf -- configuration for send on devices
 ## Modified 06/01
-## Test
 import os
 import sys
 import getopt
@@ -77,7 +76,7 @@ def TestResult():
 	#06/01 add error check
 		if err['errchk'] == 1:
 			print ('=== Error Check ' + i + ' ===')
-			subprocess.call(['ethtool', '-S', i])
+			subprocess.call('ethtool -S '+ i +'| grep err',shell='True')
 
 def pgset(a):
 	global PGDEV
@@ -109,9 +108,9 @@ def usage():
 	print ("\t Please follow format to stress Ethernet device \n \
 	\t such as : \n \
 	\t Host port to port \n \
-	\t pktgen_mod.py -s eth0 -d eth1 -c [count]] -m [MTU] -b\n \
+	\t ./pkt3generater.py -s eth0 -d eth1 -c [count]] -m [MTU] -b\n \
 	\t Host port to MAC \n \
-	\t pktgen_mod.py -s eth0 -d 00:00:00:00:00:00 -c 15000 -m 1500 \n \
+	\t ./pkt3generater.py -s eth0 -d 00:00:00:00:00:00 -c 15000 -m 1500 \n \
 	\t -s : source port \n \
 	\t -d : destination port \n \
 	\t -c : count [Count] setting as 0 is inifinit loop \n \
@@ -190,7 +189,9 @@ def main(argv):
 if __name__ == "__main__":
 	if len(sys.argv) < 2:
 		usage()
-	cmdRt=subprocess.call('rmmod pktgen',shell='True')
+	cmdRt=subprocess.call('lsmod | grep pktgen > /dev/null 2>&1',shell='True')
+	if cmdRt == 0 :
+		cmdRt=subprocess.call('rmmod pktgen',shell='True')
 	cmdRt=subprocess.call('modprobe pktgen',shell='True')
 	if cmdRt == 0 :
 		pass
