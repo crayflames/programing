@@ -7,12 +7,11 @@ import os
 import sys
 import getopt
 import re
-import multiprocessing
 import commands
 res=[]
 dev={'testCNT':'15000','testMTU':'1500','bilateral':'0'}
 err={'errchk':'0','dstresult':'0'}
-coreNum=multiprocessing.cpu_count()
+coreNum=subprocess.getoutput('nproc')
 setSrcCount=0
 setDstCount=0
 devSRC={}
@@ -200,7 +199,7 @@ if __name__ == "__main__":
 	else:
 		print ('pktgen not implentment')
 	kpklist=[]
-	for i in range(coreNum) : 
+	for i in range(int(coreNum)) : 
 		if os.path.exists('/proc/net/pktgen/kpktgend_'+str(i)) :
 			kpklist.append('/proc/net/pktgen/kpktgend_'+str(i))
 	a=0
