@@ -2,11 +2,11 @@
 import argparse
 parser=argparse.ArgumentParser()
 #positional arguments  
+#似乎都不能省略
 #這裡echo square的順序是不變的 echo先
 parser.add_argument("echo",help="echo echo")
 #type 可以指定參數或字串 例如: -v 123 or -v string ]
 parser.add_argument("square",help="Display a square of a given number",type=int)
-
 
 #optional arguments
 ##type 可以指定參數或字串 例如: -v 123 or -v string
@@ -25,6 +25,7 @@ if args.echo:
 	print("echo echo2")
 	print(args.square**2)
 if args.test >=2 :
+	#這裡會存成數字 -ttt 就存3次 
 	s=args.test
 	print("s="+str(s))
 	print(args.square**args.test)
