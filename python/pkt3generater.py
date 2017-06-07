@@ -27,8 +27,7 @@ def DSTlist(a):
 
 class nwchk:
 	def __init__(self,a):
-		self.devChk(a)
-		self.devLink(a)
+		self.dev = a
 	def devChk(self , a):
 		#確認裝置是否存在
 		if not os.path.exists("/sys/class/net/" + str(a)):
@@ -54,6 +53,13 @@ class nwchk:
 			#2/8判斷目標port 是否為本機的，是的話 dstresult 為1			
 			err['dstresult']=1
 			dev['dstMac']=open('/sys/class/net/' + a + '/address').readline().strip()
+	def setMTU(self,setmtu):
+		if not setmtu == '1500': 
+			cmd='ifconfig ' + self.dev + ' mtu ' + setmtu
+			subprocess.call(cmd,shell=True)
+		else:
+			cmd='ifconfig ' + self.dev + ' mtu ' + setmtu
+			subprocess.call(cmd,shell=True)			
 
 def TestResult():
 	for i in res:
@@ -76,6 +82,7 @@ def TestResult():
 		if err['errchk'] == 1:
 			print ('=== Error Check ' + i + ' ===')
 			subprocess.call('ethtool -S '+ i +'| grep err',shell='True')
+
 
 def pgset(a):
 	global PGDEV
@@ -109,7 +116,7 @@ def usage():
 	\t How to use : \n \
 	\t such as : \n \
 	\t Host port to port \n \
-	\t ./pkt3generater.py -s eth0 -d eth1 -c [count]] -m [MTU] -b\n \
+	\t ./pkt3generater.py -s eth0 -d eth1 -c [count]] -b\n \
 	\t Host port to MAC \n \
 	\t ./pkt3generater.py -s eth0 -d 00:00:00:00:00:00 -c 15000 -m 1500 \n \
 	\t -s : source port \n \
@@ -140,6 +147,7 @@ def main(argv):
 			dev['testCNT'] = arg
 		elif opt in ("-m", "--mtu"):
 			dev['testMTU'] = arg
+			
 		elif opt in ("-b", "--bilateral"):
 			dev['bilateral'] = 1
 		elif opt in ("-E", "--errchk"):
@@ -155,6 +163,7 @@ def main(argv):
 	print ("Adding devices to run.")
 	s=nwchk(devSRC['src'+str(setSrcCount)])
 	s.devMac(devDST['dst'+str(setDstCount)])
+	s.setMTU(dev['testMTU'])
 	adddev()
 	
 	## Configure the individual devices
@@ -186,6 +195,7 @@ def main(argv):
 	print ("Running... ctrl^C to stop")
 	pgset ("start")
 	print ("Done")
+	s.setMTU('1500')
 
 if __name__ == "__main__":
 	if len(sys.argv) < 2:
