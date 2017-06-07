@@ -2,7 +2,6 @@
 import argparse
 parser=argparse.ArgumentParser()
 #positional arguments  
-#似乎都不能省略
 #這裡echo square的順序是不變的 echo先
 parser.add_argument("echo",help="echo echo")
 #type 可以指定參數或字串 例如: -v 123 or -v string ]
