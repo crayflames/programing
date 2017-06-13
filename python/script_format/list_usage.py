@@ -34,3 +34,16 @@ lslist=('a','b','c')
 kpklist.extend(lslist)
 kpklist.extend(dst.keys())
 print(kpklist)
+print(kpklist[1])
+#Reading a file and save to list.
+i=open('/home/roger/Desktop/test.log','r')
+#讀取檔案篩選eth0的行
+for line in i:
+	if "eth0" in line:
+		#行切割後
+		for e in line.strip().split('\n'):
+			#再切割欄位
+			a.append(e.split())
+for i in range(len(a)):
+	#取第三欄
+	ap.append(a[i][2])
