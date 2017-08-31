@@ -1,12 +1,13 @@
 #! /usr/bin/env python3
 # -*- coding: utf8 -*-
 ## pktgen.conf -- configuration for send on devices
-## Modified 06/01
+## Modified 07/14
 import os
 import sys
 import getopt
 import subprocess
 import re
+import time
 res=[]
 dev={'testCNT':'15000','testMTU':'1500','bilateral':'0'}
 err={'errchk':'0','dstresult':'0'}
@@ -15,6 +16,10 @@ setSrcCount=0
 setDstCount=0
 devSRC={}
 devDST={}
+tTime=time.strftime("%Y%m%d%H%M",time.localtime())
+logFile='pktgen_'+ tTime +'.log'
+if os.exists(logFile):
+	os.remove(logFile)
 def SRClist(a):
 	global setSrcCount
 	setSrcCount+=1
@@ -27,7 +32,8 @@ def DSTlist(a):
 
 class nwchk:
 	def __init__(self,a):
-		self.dev = a
+		self.devChk(a)
+		self.devLink(a)
 	def devChk(self , a):
 		#確認裝置是否存在
 		if not os.path.exists("/sys/class/net/" + str(a)):
@@ -53,36 +59,43 @@ class nwchk:
 			#2/8判斷目標port 是否為本機的，是的話 dstresult 為1			
 			err['dstresult']=1
 			dev['dstMac']=open('/sys/class/net/' + a + '/address').readline().strip()
-	def setMTU(self,setmtu):
+	def setMTU(self,a):
 		if not setmtu == '1500': 
-			cmd='ifconfig ' + self.dev + ' mtu ' + setmtu
+			cmd='ifconfig ' + a + ' mtu ' + dev['testMTU']
 			subprocess.call(cmd,shell=True)
 		else:
-			cmd='ifconfig ' + self.dev + ' mtu ' + setmtu
-			subprocess.call(cmd,shell=True)			
+			cmd='ifconfig ' + a + ' mtu ' + dev['testMTU']
+			subprocess.call(cmd,shell=True)	
+
+def logwrite(a):
+	global tTime
+	global logFile
+	pktRs=open(logFile,'a+')
+	pktRs.write( a + '\n')
+	pktRs.close()
 
 def TestResult():
 	for i in res:
 		if os.path.exists('/proc/net/pktgen/'+ i):
 			if res.count(i) > 1:
 				res.remove(i)
-			print ("=== " + i + " ===")
+			logwrite("=== " + i + " ===")
 			strTime=subprocess.getoutput("cat /proc/net/pktgen/" + i + "| grep Result | awk '{print $3}' | awk -F '(' '{ print $1/1000000 }'")
 			totTras=subprocess.getoutput("cat /sys/class/net/" + i + "/statistics/tx_bytes | awk '{print $1/1024/1024}'")
 			totCount=subprocess.getoutput("cat /proc/net/pktgen/" + i + "| grep sofar | awk '{print $2}'")
 			perMB=subprocess.getoutput("cat /proc/net/pktgen/" + i + "| grep Mb/sec | awk '{print $2}'")
-			print ("Test Result :")
-			print ("Total running time\t: " + str(strTime) + " secs")
-			print ("Performance\t\t: " + str(perMB) + " MB")
-			print ("Packet size\t\t: " + str(dev['testMTU']))
-			print ("Parameter Count\t\t: " + str(dev['testCNT']) )
-			print ("Total transfer count\t: " + str(totCount) )
-			print ("Total transfer MB\t: " + str(totTras) + "MB")
-	#06/01 add error check
+			logwrite("Test Result :")
+			logwrite("Total running time\t: " + str(strTime) + " secs")
+			logwrite("Performance\t\t: " + str(perMB) + " MB")
+			logwrite("Packet size\t\t: " + str(dev['testMTU']))
+			logwrite("Parameter Count\t\t: " + str(dev['testCNT']) )
+			logwrite("Total transfer count\t: " + str(totCount) )
+			logwrite("Total transfer MB\t: "+ str(totTras) + "MB")
 		if err['errchk'] == 1:
-			print ('=== Error Check ' + i + ' ===')
-			subprocess.call('ethtool -S '+ i +'| grep err',shell='True')
-
+			logwrite('=== Error Check ' + i + ' ===')
+			logwrite(subprocess.getoutput('ethtool -S '+ i +'| grep err'))
+	for _ in open('pktgen_'+ tTime +'.log','r',encoding='UTF-8'):
+		print(_,end='')
 
 def pgset(a):
 	global PGDEV
@@ -147,7 +160,6 @@ def main(argv):
 			dev['testCNT'] = arg
 		elif opt in ("-m", "--mtu"):
 			dev['testMTU'] = arg
-			
 		elif opt in ("-b", "--bilateral"):
 			dev['bilateral'] = 1
 		elif opt in ("-E", "--errchk"):
@@ -162,6 +174,7 @@ def main(argv):
 	pgset ("rem_device_all")
 	print ("Adding devices to run.")
 	s=nwchk(devSRC['src'+str(setSrcCount)])
+	subprocess.call('ethtool -G ' + devSRC['src'+str(setSrcCount)] + ' tx 1024',shell=True)
 	s.devMac(devDST['dst'+str(setDstCount)])
 	s.setMTU(dev['testMTU'])
 	adddev()
@@ -184,6 +197,7 @@ def main(argv):
 		a+=1
 		PGDEV = kpklist[a]
 		s=nwchk(devSRC['src'+str(setSrcCount)])
+		subprocess.call('ethtool -G ' + devSRC['src'+str(setSrcCount)] + ' tx 1024')
 		s.devMac(devDST['dst'+str(setDstCount)])
 		adddev()
 		PGDEV="/proc/net/pktgen/" + devSRC['src'+str(setSrcCount)]
@@ -202,8 +216,8 @@ if __name__ == "__main__":
 		usage()
 	cmdRt=subprocess.call('lsmod | grep pktgen > /dev/null 2>&1',shell='True')
 	if cmdRt == 0 :
-		cmdRt=subprocess.call('rmmod pktgen',shell='True')
-	cmdRt=subprocess.call('modprobe pktgen',shell='True')
+		cmdRt=subprocess.call('rmmod pktgen > /dev/null 2>&1',shell='True')
+	cmdRt=subprocess.call('modprobe pktgen > /dev/null 2>&1',shell='True')
 	if cmdRt == 0 :
 		pass
 	else:

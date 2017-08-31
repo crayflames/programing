@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 import matplotlib.pyplot as plt
 a=[]
-i=open('/home/roger/Desktop/test.log','r')
+i=open('test.log','r')
 #讀取檔案篩選eth0的行
 for line in i:
 	if "eth0" in line:

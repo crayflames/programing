@@ -11,7 +11,7 @@ import commands
 res=[]
 dev={'testCNT':'15000','testMTU':'1500','bilateral':'0'}
 err={'errchk':'0','dstresult':'0'}
-coreNum=subprocess.getoutput('nproc')
+coreNum=commands.getoutput('nproc')
 setSrcCount=0
 setDstCount=0
 devSRC={}
@@ -28,8 +28,7 @@ def DSTlist(a):
 
 class nwchk:
 	def __init__(self,a):
-		self.devChk(a)
-		self.devLink(a)
+		self.dev = a
 	def devChk(self , a):
 		#確認裝置是否存在
 		if not os.path.exists("/sys/class/net/" + str(a)):
@@ -55,6 +54,13 @@ class nwchk:
 			#2/8判斷目標port 是否為本機的，是的話 dstresult 為1			
 			err['dstresult']=1
 			dev['dstMac']=open('/sys/class/net/' + a + '/address').readline().strip()
+	def setMTU(self,setmtu):
+		if not setmtu == '1500': 
+			cmd='ifconfig ' + self.dev + ' mtu ' + setmtu
+			os.system(cmd)
+		else:
+			cmd='ifconfig ' + self.dev + ' mtu ' + setmtu
+			os.system(cmd)
 
 def TestResult():
 	for i in res:
@@ -155,6 +161,7 @@ def main(argv):
 	print ("Adding devices to run.")
 	s=nwchk(devSRC['src'+str(setSrcCount)])
 	s.devMac(devDST['dst'+str(setDstCount)])
+	s.setMTU(dev['testMTU'])
 	adddev()
 	
 	## Configure the individual devices
@@ -186,14 +193,15 @@ def main(argv):
 	print ("Running... ctrl^C to stop")
 	pgset ("start")
 	print ("Done")
-
+	
+	s.setMTU('1500')
 if __name__ == "__main__":
 	if len(sys.argv) < 2:
 		usage()
 	cmdRt=os.system('lsmod |grep pktgen > /dev/null 2>&1')
 	if cmdRt == 0 :
-		cmdRt=os.system('rmmod pktgen')
-	cmdRt=os.system('modprobe pktgen')
+		cmdRt=os.system('rmmod pktgen > /dev/null 2>&1')
+	cmdRt=os.system('modprobe pktgen > /dev/null 2>&1')
 	if cmdRt == 0 :
 		pass
 	else:
