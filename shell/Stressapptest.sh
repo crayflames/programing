@@ -1,7 +1,14 @@
 #! /bin/bash
-#0717
+#1012 Add SAS HBA
+ostime=$(date +%s)
+if (( $ostime - 1505089010 < 0 )); then
+	echo "PLZ correct OS time as current time"
+fi
+
 export PATH=$(pwd):$PATH
-chmod 777 stressapptest
+#chmod 777 stressapptest
+./install.sh
+
 Mem=$(cat /proc/meminfo | grep MemAvailable | awk '{print $2/1024*0.85}')
 tstTime=$(date '+%Y%m%d%H%M')
 Cpu=$(nproc)
@@ -16,9 +23,9 @@ case $1 in
         FULL)
                 CPU=1
                 MEM=1
-                NVME=1
+                HDD=0
 				log=testlog/stressapptest_FULL_$tstTime.log
-				fiolog=testlog/fio_NVMe_$tstTime.log
+				fiolog=testlog/fio_HDD_$tstTime.log
         ;;
         CPU)
                 CPU=1
@@ -44,37 +51,40 @@ if [ $MEM -eq 1 ]; then
         tMEM="-M $Mem "
 fi
 
-echo "Check Tools..."
-if [ $NVME -eq 1 ]; then
+if [ $HDD -eq 1 ]; then
+	#Check NVMe
 	if [ -e /dev/nvme0n1 ]; then
-	    echo "Check FIO"
-		which fio
-		if [ $? -eq 0 ];then
-			echo "FIO is already install."
-			fio -v
-		else
-			echo "Install FIO..."
-			rpm -ivh librdmacm1-1.0.19.1-4.3.1.aarch64.rpm
-			rpm -ivh fio-2.2.8-2.el7.aarch64.rpm
-		fi
 		echo "***************************"
 		echo "Fio NVMe test start..."
 		echo "***************************"
 		nohup fio --direct=1 --iodepth=16 --thread --rw=rw --rwmixread=50 --ioengine=libaio --bs=4k --time_based --numjobs=32 --runtime=$Time --group_reporting --name=nvme1 --filename=/dev/nvme0n1 --output=$(pwd)/$fiolog &
    	else
-		echo "NVMe is not exist. Test is not Available. "
+		echo "NVMe is not exist. HDD test is UnAvailable. "
 		read -p "keep testing without NVMe? :[y/n]" yes
 		if [ $yes == "y" ]; then
 			echo "start test stressapptest"
-			NVME=0
+			HDD=0
 		else
 			exit 1
 		fi
 	fi
+#	#Check SAS 9400-8e
+#	if [ lspci | grep LSI ]; then
+#		echo "***************************"
+#		echo "Fio SAS HBA Stress start..."
+#		echo "***************************"
+#		nohup fio parameter.fio  > $(pwd)/$fiolog &
+ #  	else
+#		echo "9400-8e is not exist. HDD test is UnAvailable. "
+#		read -p "keep testing without HDD test? :[y/n]" yes
+#		if [ $yes == "y" ]; then
+#			echo "start test stressapptest"
+			HDD=0
+#		else
+#			exit 1
+#		fi
+#	fi
 fi
-
-echo "Check stressapptest"
-which stressapptest
 
 echo "***************************"
 echo "Start test stressapptest..."

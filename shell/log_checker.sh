@@ -2,14 +2,14 @@
 
 allfile()
 {
-for file in $(ls *.*)
+for file in $(ls *)
 do
 	echo "=========================================="
 	echo "filename:" $file
 	echo "search:		" $keyWord
 	echo "=========================================="
-	cat $file | grep -i $keyWord | uniq
-	keyCount=$(cat $file | grep -i "$keyWord" | wc -l)
+	cat $file | grep -ia $keyWord | uniq
+	keyCount=$(cat $file | grep -ia "$keyWord" | wc -l)
 	echo ""
 	echo "  ==========Keywork count :" $keyCount "=========="
 	echo "=========================================="
@@ -22,8 +22,8 @@ string()
 echo "filename:" $fileName
 echo "search:	 " $keyWord
 echo "=======================Begin=========================="
-cat $fileName | grep -i $keyWord | sort | uniq
-keyCount=$(cat $fileName | grep -i "$keyWord" | wc -l)
+cat $fileName | grep -i 'keyWord' | sort | uniq
+keyCount=$(cat $fileName | grep -ia "$keyWord" | wc -l)
 echo "========================END==========================="
 echo "Keywork count:	" $keyCount
 }
@@ -51,23 +51,6 @@ diff()
 diff -b -B $fileA $fileB
 }
 
-check2()
-{
-busNumber=$(cat 941310000453_Error_Detection.log | grep "[1]" | grep -i "receiver" -B 23 | grep "bus" | sort |uniq|wc -l)
-receiverNumber=$(cat 941310000453_Error_Detection.log | grep "[1]" | grep -i "receiver" |wc -l)
-for ((i=1 ; i<=busNumber ; i++))
-do
-	((a++))
-	for line in $(cat 941310000453_Error_Detection.log | grep "[1]" | grep -i "receiver" -B 23 | grep "bus" | sort |uniq)
-	do
-	echo $line
-		for counter in $(cat 941310000453_Error_Detection.log | grep "[1]" | grep -i "receiver")
-		do
-		echo ""
-		done
-	done
-done
-}
 usage()
 {
 
@@ -96,8 +79,9 @@ while getopts "t:v:d:hsf:" arg
 do 
 	case $arg in		
 		f)
-		fileName=$2
-		keyWord=$3
+		shift
+		fileName=$1
+		keyWord=$2
 		string fileName,keyWord
 		;;
 

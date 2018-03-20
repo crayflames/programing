@@ -1,5 +1,10 @@
 #! /bin/bash
-#0829
+#0911 Add check time
+ostime=$(date +%s)
+if (( $ostime - 1505089010 < 0 )); then
+	echo "PLZ correct OS time as current time"
+fi
+
 export PATH=$(pwd):$PATH
 Mem=$(cat /proc/meminfo | grep MemAvailable | awk '{print $2/1024*0.85}')
 tstTime=$(date '+%Y%m%d%H%M')

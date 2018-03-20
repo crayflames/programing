@@ -1,0 +1,75 @@
+#! /bin/bash
+
+IP=192.3.1.$1
+usage(){
+	echo "PLZ input command such as sol : ipmit [IP] sol"
+	echo "PLZ input command such as sol : ipmit [IP] sol deactivate"
+	echo "PLZ input command such as sol : ipmit [IP] power"
+	echo "PLZ input command such as sol : ipmit [IP] power off"
+	echo "PLZ input command such as sol : ipmit [IP] power status"
+	echo "PLZ input command such as sol : ipmit [IP] power cycle"
+	echo "PLZ input command such as sol : ipmit [IP] sel"
+	echo "PLZ input command such as sol : ipmit [IP] sel clear"
+	echo "PLZ input command such as sol : ipmit [IP] sdr"
+	echo "PLZ input command such as sol : ipmit [IP] fru"
+	echo "PLZ input command such as sol : ipmit [IP] lan"
+	echo "other command via:"
+	echo "PLZ input command such as sol : ipmit [IP] '[command]'"
+	exit 1
+}
+if [ $# -le 0 ]; then
+	usage
+fi
+if [ -z "$2" ]; then
+	usage
+	exit 1
+elif [ "$2" == "sol" ]; then
+	#statements
+	if [ "$3" == "de" ]; then
+		SOLcmd='sol deactivate'
+	else
+		SOLcmd='sol activate'
+	fi
+elif [ "$2" == "power" ]; then
+	if [ "$3" == "off" ]; then
+		SOLcmd='power off'
+	elif [ "$3" == "status" ]; then
+		SOLcmd='power status'
+	elif [ "$3" == "cycle" ]; then
+		SOLcmd='power cycle'
+	else
+		SOLcmd='power on'
+	fi
+elif [ "$2" == "sel" ]; then
+	if [ "$3" == "clear" ]; then
+		SOLcmd='sel clear'
+	else
+		SOLcmd='sel elist'
+	fi
+elif [ "$2" == "sdr" ]; then
+		SOLcmd='sdr'
+elif [ "$2" == "fru" ]; then
+		SOLcmd='fru'
+elif [ "$2" == "lan" ]; then
+		SOLcmd='lan print'
+elif [ "$2" == "raw" ]; then
+	if [ "$3" == "uuid" ]; then
+		SOLcmd='raw 0x06 0x01'
+	elif [ "$3" == "reset" ]; then
+		SOLcmd='raw 0x06 0x02'
+	else
+		SOLcmd='raw 0x06 0x01'
+	fi
+elif [ "$2" == "ping" ]; then
+		ping -c 3 $IP
+		while [ $? == 1 ]
+		do
+			ping -c 3 $IP
+		done
+		exit 1
+
+else
+	SOLcmd=$2
+fi
+
+ipmitool -H $IP -U admin -P admin -I lanplus $SOLcmd

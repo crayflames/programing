@@ -18,7 +18,7 @@ devSRC={}
 devDST={}
 tTime=time.strftime("%Y%m%d%H%M",time.localtime())
 logFile='pktgen_'+ tTime +'.log'
-if os.exists(logFile):
+if os.path.exists(logFile):
 	os.remove(logFile)
 def SRClist(a):
 	global setSrcCount

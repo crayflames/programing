@@ -1,7 +1,7 @@
 #! /bin/bash
-tHDD=$(lsscsi | grep WDC | awk '{print $7}')
+tHDD=$(lsscsi | grep SEAGATE | awk '{print $7}')
 fName=HDD_smart_info.log
-fCunt=$(lsscsi | grep WDC -c)
+fCunt=$(lsscsi | grep SEAGATE -c)
 
 #Check tmp log exist if exist delete it
 [ -e $fName ] && rm -f $fName ||touch $fName
