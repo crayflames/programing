@@ -4,19 +4,17 @@ import datetime
 import requests
 import time
 from bs4 import BeautifulSoup
+import stockPrice
 #想要找的股票
 stockList=['2317', '2887', '2354', '3209']
 #持有成本
 stockCost=['78.01','12.8','78.91','20.39']
 #爬出來的股價
 stockValue=[]
-#存入訊息裡
-content=[]
+
 for _ in stockList:
-	res=requests.get('https://tw.stock.yahoo.com/q/q?s='+ _ )
-	wes=BeautifulSoup(res.text,"html.parser")
-	ss=wes.select("b")
-	stockValue.append(ss[0].text)
+	stockValue.append(stockPrice.SP(_))
+
 stockTime=time.strftime("%H:%M:%S", time.localtime())
  
 msgs='=搜尋股價='+ '\n' \
