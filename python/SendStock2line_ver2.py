@@ -1,9 +1,7 @@
 #! /usr/bin/python3
 # -*- coding: utf8 -*-
-import datetime
 import requests
 import time
-from bs4 import BeautifulSoup
 import stockPrice
 #想要找的股票
 stockList=['2317', '2887', '2354', '3209']
