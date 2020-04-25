@@ -1,0 +1,19 @@
+import datetime
+import requests
+import time
+from bs4 import BeautifulSoup
+from selenium import webdriver
+import sys
+import codecs
+sys.stdout = codecs.getwriter("utf-8")(sys.stdout.detach())
+
+driver = webdriver.Chrome(executable_path='./chromedriver')
+driver.implicitly_wait(20)
+driver.get(url='https://histock.tw/index-tw/FIMTX')
+html_source = driver.page_source
+ss=driver.find_element_by_class_name('clr-rd')
+driver.quit()
+soup=BeautifulSoup(html_source,'html.parser')
+value=soup.find_all('span',class_ = 'clr-rd')
+print(value[0].text)
+
